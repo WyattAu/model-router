@@ -1,0 +1,31 @@
+[package]
+name = "model-router"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+authors = ["Wyatt Au <wyatt_au@protonmail.com>"]
+license = "Apache-2.0"
+repository = "https://github.com/WyattAu/model-router"
+homepage = "https://github.com/WyattAu/model-router"
+documentation = "https://docs.rs/model-router"
+description = "Cost-aware LLM routing core: per-model pricing tables, USD budget tracking, and task-class routing with fallback chains."
+readme = "README.md"
+keywords = ["llm", "router", "cost", "budget", "ai"]
+categories = ["algorithms", "development-tools"]
+
+[features]
+default = []
+serde = ["dep:serde"]
+# Optional companion adapter for the `genai` crate: maps genai model
+# identifiers (`ModelIden`) to pricing-table entries. The core of this crate
+# never depends on genai.
+genai = ["dep:genai"]
+
+[dependencies]
+thiserror = "2.0"
+serde = { version = "1", features = ["derive"], optional = true }
+genai = { version = "0.7.0-beta", optional = true, default-features = false }
+
+[dev-dependencies]
+proptest = "1"
+serde_json = "1"
