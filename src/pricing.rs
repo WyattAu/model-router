@@ -1,5 +1,13 @@
 //! Per-model pricing data and a built-in table for popular models.
+//!
+//! Price tables go stale. [`ModelPricing`] carries an optional
+//! `updated_at_unix` stamp and [`PricingTable`] can [`PricingTable::merge`]
+//! fresher entries over older ones and load JSON snapshots
+//! ([`PricingTable::from_json`], feature `json`), so rates can be refreshed
+//! at runtime from a URL or file without a crate release.
 
+#[cfg(feature = "json")]
+use crate::error::RouterError;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -22,6 +30,12 @@ pub struct ModelPricing {
     /// Quality tier (1-5, 5 = highest). Used by
     /// [`crate::Router::select_by_complexity`] and [`ModelPricing::efficiency`].
     pub quality_tier: u8,
+    /// Unix-seconds timestamp of when this entry was last refreshed from an
+    /// external source (`None` = freshness unknown, e.g. built-in defaults).
+    /// Used by [`PricingTable::merge`] conflict resolution. Deserialized as
+    /// `None` when absent, so pre-0.1.1 JSON snapshots still load.
+    #[cfg_attr(feature = "serde", serde(default))]
+    updated_at_unix: Option<u64>,
 }
 
 impl ModelPricing {
@@ -54,6 +68,41 @@ impl ModelPricing {
         self
     }
 
+    /// Stamp the entry with an explicit refresh time, as Unix seconds
+    /// (builder style). See [`ModelPricing::updated_at_unix`].
+    pub fn with_updated_at_unix(mut self, updated_at_unix: u64) -> Self {
+        self.updated_at_unix = Some(updated_at_unix);
+        self
+    }
+
+    /// Stamp the entry with the current wall-clock time as Unix seconds
+    /// (builder style). Convenience for code that builds refresh snapshots.
+    pub fn with_updated_at_now(self) -> Self {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_secs())
+            .unwrap_or(0);
+        self.with_updated_at_unix(now)
+    }
+
+    /// Unix-seconds timestamp of the last refresh from an external source,
+    /// if known (`None` = freshness unknown).
+    pub fn updated_at_unix(&self) -> Option<u64> {
+        self.updated_at_unix
+    }
+
+    /// Whether `self` should replace `other` in a [`PricingTable::merge`]:
+    /// true when `self` carries a strictly newer `updated_at_unix` stamp, or
+    /// any stamp at all while `other` carries none. Two unstamped entries
+    /// (or an older stamp) never win.
+    pub fn is_newer_than(&self, other: &Self) -> bool {
+        match (self.updated_at_unix, other.updated_at_unix) {
+            (Some(mine), Some(theirs)) => mine > theirs,
+            (Some(_), None) => true,
+            (None, _) => false,
+        }
+    }
+
     /// Calculate the cost in USD for a given number of input/output tokens.
     pub fn cost(&self, input_tokens: usize, output_tokens: usize) -> f64 {
         (input_tokens as f64 * self.input_per_1m / 1_000_000.0)
@@ -76,7 +125,7 @@ impl ModelPricing {
 impl Default for ModelPricing {
     /// Placeholder pricing used to *estimate* cost for models that are not in
     /// the table ($1.00/1M input, $3.00/1M output, 128k context, 4,096 max
-    /// output, tier 3).
+    /// output, tier 3, no freshness stamp).
     fn default() -> Self {
         Self {
             input_per_1m: 1.0,
@@ -84,6 +133,7 @@ impl Default for ModelPricing {
             context_window: 128_000,
             max_output_tokens: 4_096,
             quality_tier: 3,
+            updated_at_unix: None,
         }
     }
 }
@@ -236,4 +286,145 @@ pub fn default_pricing_table() -> BTreeMap<String, ModelPricing> {
     );
 
     table
+}
+
+/// A refreshable set of [`ModelPricing`] entries keyed by model identifier.
+///
+/// The built-in rates returned by [`default_pricing_table`] inevitably go
+/// stale. [`PricingTable`] exists so callers can refresh them at runtime
+/// (from a file, an HTTP JSON endpoint, etc.) without waiting for a crate
+/// release:
+///
+/// 1. Serialize a table with the `serde`/`json` features and host the JSON
+///    (the shape is a plain object mapping model id to pricing fields).
+/// 2. Load it with [`PricingTable::from_json`] (feature `json`).
+/// 3. [`PricingTable::merge`] it over your current table — entries that are
+///    missing or stamped newer (see [`ModelPricing::is_newer_than`]) win;
+///    everything else is left untouched.
+///
+/// The built-in defaults are *unstamped* (`updated_at_unix == None`), so any
+/// timestamped refresh entry wins over them.
+///
+/// With the `serde` feature the table (de)serializes transparently as a
+/// plain `{ "model-id": {...} }` JSON object.
+#[derive(Debug, Clone, Default, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(transparent))]
+pub struct PricingTable {
+    entries: BTreeMap<String, ModelPricing>,
+}
+
+impl PricingTable {
+    /// An empty table.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// A table seeded with the built-in rates (see [`default_pricing_table`]).
+    pub fn with_defaults() -> Self {
+        Self {
+            entries: default_pricing_table(),
+        }
+    }
+
+    /// Insert (or replace) pricing for a model key, returning the previous
+    /// entry if any. Insertions are not timestamp-checked; use
+    /// [`PricingTable::merge`] for freshness-aware upserts.
+    pub fn insert(
+        &mut self,
+        model: impl Into<String>,
+        pricing: ModelPricing,
+    ) -> Option<ModelPricing> {
+        self.entries.insert(model.into(), pricing)
+    }
+
+    /// Pricing for a model key, if present.
+    pub fn get(&self, model: &str) -> Option<&ModelPricing> {
+        self.entries.get(model)
+    }
+
+    /// Number of entries.
+    pub fn len(&self) -> usize {
+        self.entries.len()
+    }
+
+    /// Whether the table has no entries.
+    pub fn is_empty(&self) -> bool {
+        self.entries.is_empty()
+    }
+
+    /// Iterate `(model id, pricing)` pairs in deterministic (sorted) order.
+    pub fn iter(&self) -> impl Iterator<Item = (&str, &ModelPricing)> {
+        self.entries
+            .iter()
+            .map(|(model, pricing)| (model.as_str(), pricing))
+    }
+
+    /// Upsert every entry of `other` into `self`, keeping `self`'s entry
+    /// unless `other`'s is missing from `self` or carries a strictly newer
+    /// [`ModelPricing::updated_at_unix`] stamp.
+    ///
+    /// Semantics:
+    ///
+    /// - key only in `other` → added;
+    /// - key in both, `other` newer (or `self` unstamped, `other` stamped) →
+    ///   `other`'s entry replaces `self`'s;
+    /// - key in both, `self` equal-or-newer (or both unstamped) → `self`'s
+    ///   entry is preserved.
+    pub fn merge(&mut self, other: &PricingTable) {
+        merge_into(&mut self.entries, other);
+    }
+
+    /// Parse a table from JSON (feature `json`).
+    ///
+    /// Accepts the same shape [`PricingTable::to_json`] emits: a plain object
+    /// mapping model id to a pricing object. The `updated_at_unix` field is
+    /// optional (`None` when absent), so snapshots produced before 0.1.1 —
+    /// or by external tooling — still load.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use model_router::PricingTable;
+    ///
+    /// let json = r#"{
+    ///     "gpt-4o": {
+    ///         "input_per_1m": 2.5,
+    ///         "output_per_1m": 10.0,
+    ///         "context_window": 128000,
+    ///         "max_output_tokens": 16384,
+    ///         "quality_tier": 4,
+    ///         "updated_at_unix": 1757289600
+    ///     }
+    /// }"#;
+    /// let table = PricingTable::from_json(json).expect("valid table JSON");
+    /// assert_eq!(table.get("gpt-4o").expect("entry").updated_at_unix(), Some(1_757_289_600));
+    /// ```
+    #[cfg(feature = "json")]
+    pub fn from_json(json: &str) -> Result<Self, RouterError> {
+        serde_json::from_str(json).map_err(|e| RouterError::Json(e.to_string()))
+    }
+
+    /// Serialize the table to JSON (feature `json`).
+    ///
+    /// The output is a plain object mapping model id to pricing object, with
+    /// `updated_at_unix` present when stamped — the exact shape
+    /// [`PricingTable::from_json`] accepts, suitable for hosting at a URL or
+    /// writing to a file for the refresh workflow.
+    #[cfg(feature = "json")]
+    pub fn to_json(&self) -> Result<String, RouterError> {
+        serde_json::to_string(self).map_err(|e| RouterError::Json(e.to_string()))
+    }
+}
+
+/// Shared upsert used by [`PricingTable::merge`] and
+/// [`crate::Router::merge_pricing`].
+pub(crate) fn merge_into(entries: &mut BTreeMap<String, ModelPricing>, other: &PricingTable) {
+    for (model, incoming) in other.iter() {
+        match entries.get(model) {
+            Some(existing) if !incoming.is_newer_than(existing) => {}
+            _ => {
+                entries.insert(model.to_string(), incoming.clone());
+            }
+        }
+    }
 }

@@ -6,7 +6,9 @@ use thiserror::Error;
 /// Errors returned by the routing core.
 ///
 /// The core is deliberately small: the only runtime failure it can produce is
-/// a budget rejection from [`crate::CostTracker::record`].
+/// a budget rejection from [`crate::CostTracker::record`] — plus, with the
+/// `json` feature enabled, pricing-table JSON load/serialization failures
+/// from [`crate::PricingTable::from_json`] / [`crate::PricingTable::to_json`].
 #[derive(Debug, Clone, PartialEq, Error)]
 pub enum RouterError {
     /// A spend record was rejected because it would push total tracked cost
@@ -28,4 +30,9 @@ pub enum RouterError {
         /// The task class that could not be routed.
         task: TaskClass,
     },
+    /// A pricing-table JSON payload could not be parsed or serialized
+    /// (feature `json`). The message carries the underlying serde_json
+    /// detail; the payload itself is not retained.
+    #[error("pricing table JSON error: {0}")]
+    Json(String),
 }

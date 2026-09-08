@@ -1,6 +1,6 @@
 [package]
 name = "model-router"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 rust-version = "1.85"
 authors = ["Wyatt Au <wyatt_au@protonmail.com>"]
@@ -16,6 +16,9 @@ categories = ["algorithms", "development-tools"]
 [features]
 default = []
 serde = ["dep:serde"]
+# JSON loading for price-table refresh (`PricingTable::from_json` /
+# `PricingTable::to_json`). Implies `serde`.
+json = ["dep:serde_json", "serde"]
 # Optional companion adapter for the `genai` crate: maps genai model
 # identifiers (`ModelIden`) to pricing-table entries. The core of this crate
 # never depends on genai.
@@ -24,6 +27,7 @@ genai = ["dep:genai"]
 [dependencies]
 thiserror = "2.0"
 serde = { version = "1", features = ["derive"], optional = true }
+serde_json = { version = "1", optional = true }
 genai = { version = "0.7.0-beta", optional = true, default-features = false }
 
 [dev-dependencies]

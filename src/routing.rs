@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap};
 
-use crate::pricing::{default_pricing_table, ModelPricing};
+use crate::pricing::{default_pricing_table, merge_into, ModelPricing, PricingTable};
 
 /// Generic routing class for a unit of work.
 ///
@@ -234,6 +234,16 @@ impl Router {
     pub fn with_pricing(mut self, model: impl Into<String>, pricing: ModelPricing) -> Self {
         self.add_pricing(model, pricing);
         self
+    }
+
+    /// Freshness-aware merge of a [`PricingTable`] into the router's table
+    /// (see [`PricingTable::merge`]): entries that are missing from the
+    /// router's table or stamped with a newer
+    /// [`ModelPricing::updated_at_unix`] replace the existing ones; every
+    /// other entry is left untouched. This is the refresh path for keeping
+    /// built-in rates current without a crate release.
+    pub fn merge_pricing(&mut self, table: &PricingTable) {
+        merge_into(&mut self.pricing, table);
     }
 
     /// The current default model.
