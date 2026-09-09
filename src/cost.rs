@@ -152,6 +152,8 @@ impl CostTracker {
         self.total_output_tokens
             .fetch_add(output_tokens as u64, Ordering::Relaxed);
 
+        // Justified: poisoning implies a panic mid-update; tracker is best-effort.
+        #[allow(clippy::expect_used)]
         let mut per_model = self.per_model.lock().expect("cost tracker mutex poisoned");
         let record = per_model.entry(model.to_string()).or_default();
         record.input_tokens += input_tokens as u64;
@@ -186,6 +188,7 @@ impl CostTracker {
 
     /// Per-model cost breakdown.
     pub fn per_model_breakdown(&self) -> BTreeMap<String, ModelCostBreakdown> {
+        #[allow(clippy::expect_used)]
         let per_model = self.per_model.lock().expect("cost tracker mutex poisoned");
         per_model
             .iter()

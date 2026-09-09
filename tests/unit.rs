@@ -1,3 +1,6 @@
+// Tests assert invariants directly; unwraps keep failures loud.
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Unit tests ported from clawdius `model_router.rs` (pure seam only), plus
 //! coverage for the seams that file's extraction created (fallback chains,
 //! unknown-model estimation, report snapshots).

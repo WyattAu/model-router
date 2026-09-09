@@ -1,3 +1,6 @@
+// Tests assert invariants directly; unwraps keep failures loud.
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Price-table freshness: `updated_at_unix` stamps, `PricingTable::merge`
 //! semantics, and the JSON refresh workflow (feature `json`).
 

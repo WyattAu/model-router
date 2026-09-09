@@ -72,6 +72,7 @@ fn alias_model_key(name: &str) -> Option<&'static str> {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::expect_used)] // test assertions unwrap by design
     use super::*;
     use genai::adapter::AdapterKind;
 
