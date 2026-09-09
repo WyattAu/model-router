@@ -12,6 +12,7 @@ description = "Cost-aware LLM routing core: per-model pricing tables, USD budget
 readme = "README.md"
 keywords = ["llm", "router", "cost", "budget", "ai"]
 categories = ["algorithms", "development-tools"]
+exclude = ["/target"]
 
 [features]
 default = []
@@ -33,3 +34,7 @@ genai = { version = "0.7.0-beta", optional = true, default-features = false }
 [dev-dependencies]
 proptest = "1"
 serde_json = "1"
+
+[lints.clippy]
+unwrap_used = "warn"
+expect_used = "warn"
