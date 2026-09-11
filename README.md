@@ -1,5 +1,9 @@
 # model-router
 
+[![docs.rs](https://docs.rs/model-router/badge.svg)](https://docs.rs/model-router)
+[![crates.io](https://img.shields.io/crates/v/model-router.svg)](https://crates.io/crates/model-router)
+[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE)
+
 Cost-aware LLM routing core: per-model pricing tables, USD budget tracking,
 and task-class routing with fallback chains.
 
