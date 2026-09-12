@@ -13,3 +13,15 @@ jobs:
       loom: false
       wasm: false
       miri: false
+
+  # Router-seam wire tests (tests/wire_routing.rs): mock OpenAI-compatible
+  # providers on loopback via wiremock — routing, failover, timeouts, cost
+  # accounting against real HTTP.
+  integration:
+    name: Integration (wire routing)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --all-features --test wire_routing

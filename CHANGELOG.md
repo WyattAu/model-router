@@ -5,6 +5,25 @@ Changelog](https://keepachangelog.com/) — versions follow [semver](https://sem
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-09-12
+
+### Added
+
+- Router-seam wire test suite (`tests/wire_routing.rs`, 7 tests) against
+  mock OpenAI-compatible providers (wiremock on loopback): request shape
+  (routed model + messages over the wire), usage-based cost accounting,
+  failover from a failing primary (500) to a fallback (200) walking
+  `candidates()` in order, all-candidates-failing surfacing, slow-provider
+  abandonment via client timeouts, cost-aware `select_by_complexity`
+  quality-floor selection, budget cap enforcement (`BudgetExceeded`
+  rejected before state mutation), and pricing refresh via JSON updating
+  live cost estimates. (The optional `genai` companion hardcodes provider
+  endpoints, so the wire boundary is exercised at the router seam.)
+
+### CI
+
+- New `integration` job running the wire-routing suite.
+
 ## [0.1.1] - 2026-09-08
 
 ### Added
