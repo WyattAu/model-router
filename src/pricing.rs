@@ -297,7 +297,7 @@ pub fn default_pricing_table() -> BTreeMap<String, ModelPricing> {
 ///
 /// 1. Serialize a table with the `serde`/`json` features and host the JSON
 ///    (the shape is a plain object mapping model id to pricing fields).
-/// 2. Load it with [`PricingTable::from_json`] (feature `json`).
+/// 2. Load it with `PricingTable::from_json` (feature `json`).
 /// 3. [`PricingTable::merge`] it over your current table — entries that are
 ///    missing or stamped newer (see [`ModelPricing::is_newer_than`]) win;
 ///    everything else is left untouched.

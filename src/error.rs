@@ -8,7 +8,7 @@ use thiserror::Error;
 /// The core is deliberately small: the only runtime failure it can produce is
 /// a budget rejection from [`crate::CostTracker::record`] — plus, with the
 /// `json` feature enabled, pricing-table JSON load/serialization failures
-/// from [`crate::PricingTable::from_json`] / [`crate::PricingTable::to_json`].
+/// from `PricingTable::from_json` / `PricingTable::to_json`.
 #[derive(Debug, Clone, PartialEq, Error)]
 pub enum RouterError {
     /// A spend record was rejected because it would push total tracked cost

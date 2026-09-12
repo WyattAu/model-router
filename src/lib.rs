@@ -7,7 +7,7 @@
 //! - [`ModelPricing`] — per-model input/output rates in USD per 1M tokens.
 //! - [`PricingTable`] — a refreshable set of [`ModelPricing`] entries with
 //!   freshness stamps, newer-wins [`PricingTable::merge`], and JSON loading
-//!   ([`PricingTable::from_json`], feature `json`) so rates can be updated
+//!   (`PricingTable::from_json`, feature `json`) so rates can be updated
 //!   at runtime without a crate release.
 //! - [`CostTracker`] — thread-safe accumulation of spend against an optional
 //!   USD budget; rejects any single record that would push spend over budget.
@@ -48,7 +48,7 @@
 //! # Feature flags
 //!
 //! - `serde` — `Serialize`/`Deserialize` on the public data types.
-//! - `json` — [`PricingTable::from_json`] / [`PricingTable::to_json`] for
+//! - `json` — `PricingTable::from_json` / `PricingTable::to_json` for
 //!   the price-refresh workflow (implies `serde`).
 //! - `genai` — companion adapter from `genai::chat::ModelIden` to pricing
 //!   entries (pulls in the `genai` crate; core stays genai-free).

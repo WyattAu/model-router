@@ -5,6 +5,21 @@ Changelog](https://keepachangelog.com/) — versions follow [semver](https://sem
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-09-12
+
+### Added
+- Config-knob behavior matrix (`tests/config_matrix.rs`, committed
+  2026-09-12): all 11 knobs behavior-proven — default model, per-class
+  rules, fallback chains, per-model pricing, pricing merge freshness,
+  quality-tier gating, context/output limits, budget enforcement,
+  provider defaults, and pricing accessors (`updated_at` builders covered
+  in `tests/pricing_freshness.rs`). Dead-knob sweep found zero dead knobs.
+
+### Fixed
+- Crate docs linked `PricingTable::from_json` / `to_json`
+  unconditionally although they exist only with the `json` feature;
+  reworded so `cargo doc --no-deps` is warning-free with default features.
+
 ## [0.1.3] - 2026-09-12
 
 ### Added
