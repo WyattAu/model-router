@@ -5,6 +5,17 @@ Changelog](https://keepachangelog.com/) — versions follow [semver](https://sem
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-09-12
+
+### Added
+- `tests/config_matrix.rs` (10 tests): behavior-observable coverage for
+  every public config/builder knob — `set_default_model`, `with_rule`,
+  `with_fallback` (including replace-not-append semantics),
+  `with_pricing`/`add_pricing`, `merge_pricing` freshness, `with_quality_tier`
+  gating `select_by_complexity`, `with_context_window`,
+  `with_max_output_tokens`, budget enforcement, and provider-specific
+  `with_default_rules`. Dead-knob sweep found zero dead knobs.
+
 ## [0.1.2] - 2026-09-12
 
 ### Added
