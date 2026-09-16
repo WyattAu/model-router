@@ -7,6 +7,13 @@ all-features = true
 [advisories]
 version = 2
 yanked = "deny"
+ignore = [
+    # paste unmaintained (not a vulnerability; the derive macro still works).
+    # Transitive via genai 0.7.0-beta; paste has no patched release and no
+    # in-range upgrade exists (pastey is the drop-in fork upstream).
+    # TODO: drop when genai migrates off paste.
+    "RUSTSEC-2024-0436",
+]
 
 [licenses]
 version = 2
