@@ -5,6 +5,21 @@ Changelog](https://keepachangelog.com/) — versions follow [semver](https://sem
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-16
+
+### Changed
+- **BREAKING**: `ModelPricing` gained a private `updated_at_unix` field — the
+  struct is no longer constructible with a struct expression
+  (`constructible_struct_adds_private_field`).
+- **BREAKING**: `RouterError` gained a `Json` variant (exhaustive enum,
+  `enum_variant_added`).
+
+Both breaking changes landed across 0.1.1–0.1.4, which semver-checks
+correctly flags for a 0.x crate (breaking changes require a minor bump
+while pre-1.0). This release cuts 0.2.0 so the crate can be consumed
+against the v0.1.0 baseline. First release with a committed Cargo.lock
+(the CI `check --locked` gate requires it).
+
 ## [0.1.4] - 2026-09-12
 
 ### Added
