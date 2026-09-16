@@ -25,3 +25,18 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --all-features --test wire_routing
+
+  # Fuzz smoke: 60s per pricing-table/config target. Full runs are
+  # local/nightly; this gate catches regressions on the JSON load path early.
+  fuzz-smoke:
+    name: fuzz smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo install cargo-fuzz --locked
+      - name: pricing JSON smoke (60s)
+        run: cargo fuzz run fuzz_pricing_json -- -max_total_time=60 -max_len=8192 -detect_leaks=0
+      - name: router config smoke (60s)
+        run: cargo fuzz run fuzz_router_config -- -max_total_time=60 -max_len=2048 -detect_leaks=0
