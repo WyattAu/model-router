@@ -544,6 +544,10 @@ criteria = "safe-to-run"
 version = "0.23.45"
 criteria = "safe-to-deploy"
 
+[[exemptions.rustls]]
+version = "0.23.46"
+criteria = "safe-to-deploy"
+
 [[exemptions.rustls-pki-types]]
 version = "1.15.1"
 criteria = "safe-to-deploy"
@@ -806,6 +810,10 @@ criteria = "safe-to-deploy"
 
 [[exemptions.webpki-roots]]
 version = "1.0.9"
+criteria = "safe-to-deploy"
+
+[[exemptions.webpki-roots]]
+version = "1.0.10"
 criteria = "safe-to-deploy"
 
 [[exemptions.windows-core]]
