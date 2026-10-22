@@ -200,6 +200,17 @@ criteria = "safe-to-deploy"
 delta = "0.4.0 -> 0.4.1"
 notes = "Minor changes, nothing worrisome"
 
+[[audits.bytecodealliance.audits.rustls]]
+who = "Pat Hickey <p.hickey@f5.com>"
+criteria = "safe-to-deploy"
+delta = "0.23.45 -> 0.23.46"
+
+[[audits.bytecodealliance.audits.rustls-webpki]]
+who = "Alex Crichton <alex@alexcrichton.com>"
+criteria = "safe-to-deploy"
+delta = "0.103.15 -> 0.103.16"
+notes = "Updated with new certificates"
+
 [[audits.bytecodealliance.audits.semver]]
 who = "Pat Hickey <phickey@fastly.com>"
 criteria = "safe-to-deploy"
