@@ -8,7 +8,7 @@ Cost-aware LLM routing core: per-model pricing tables, USD budget tracking,
 and task-class routing with fallback chains.
 
 This is the extracted, dependency-light routing core of
-[clawdius](https://github.com/WyattAu/clawdius) — pure types and math, no HTTP
+[clawdius](https://github.com/WyattAu/clawdius): pure types and math, no HTTP
 client, no provider SDK, no async runtime. It answers one question:
 
 > given a task (and optionally a complexity requirement), which model should I
@@ -48,7 +48,7 @@ println!("remaining: ${:.4}", tracker.remaining_usd().unwrap());
 | [`ModelPricing`] | Input/output rates in USD per 1M tokens, context window, quality tier, optional `updated_at_unix` freshness stamp. |
 | [`PricingTable`] | Refreshable pricing set: newer-wins `merge`, JSON `from_json`/`to_json` (feature `json`). |
 | [`default_pricing_table`] | Built-in rates for popular Claude / GPT / Gemini / GLM / DeepSeek / OpenRouter models (May 2025). |
-| [`CostTracker`] | Thread-safe spend accumulator; **checked-then-added** budget enforcement — an over-budget record is rejected and nothing is accumulated, so tracked spend can never exceed the limit. |
+| [`CostTracker`] | Thread-safe spend accumulator; **checked-then-added** budget enforcement: an over-budget record is rejected and nothing is accumulated, so tracked spend can never exceed the limit. |
 | [`TaskClass`] | Generic routing class: `Fast`, `Balanced`, `Power`, `Embedding`. |
 | [`TaskComplexity`] | `Simple` → `Critical`; picks the cheapest quality tier that qualifies. |
 | [`RoutingRule`] / [`Router`] | Task class → model, with a linked fallback chain and deterministic quality-per-dollar selection. |
@@ -80,7 +80,7 @@ Static price tables go stale. `ModelPricing` entries carry an optional
 "freshness unknown"), and `PricingTable` supports refreshing at runtime
 without waiting for a crate release:
 
-1. **Publish** — stamp entries and serialize a table with the `json` feature:
+1. **Publish**: stamp entries and serialize a table with the `json` feature:
 
    ```rust
    use model_router::{ModelPricing, PricingTable};
@@ -90,7 +90,7 @@ without waiting for a crate release:
    let json = table.to_json().unwrap(); // host this at a URL / write to a file
    ```
 
-2. **Consume** — load the JSON and merge it over your current table. Entries
+2. **Consume**: load the JSON and merge it over your current table. Entries
    that are missing or stamped *newer* replace what you have; everything else
    is left untouched (so a stale snapshot can never clobber fresh data):
 
@@ -104,7 +104,7 @@ without waiting for a crate release:
    router.merge_pricing(&fresh); // newer-or-missing entries win
    ```
 
-The JSON shape is a plain object mapping model id to pricing fields —
+The JSON shape is a plain object mapping model id to pricing fields:
 hostable as-is, and snapshots without `updated_at_unix` (e.g. pre-0.1.1
 exports) still load:
 
@@ -123,11 +123,11 @@ exports) still load:
 
 ## Features
 
-- **`serde`** (off by default) — `Serialize`/`Deserialize` on the public data
+- **`serde`** (off by default): `Serialize`/`Deserialize` on the public data
   types.
-- **`json`** (off by default, implies `serde`) — `PricingTable::from_json` /
+- **`json`** (off by default, implies `serde`): `PricingTable::from_json` /
   `PricingTable::to_json` for the refresh workflow above.
-- **`genai`** (off by default) — thin companion adapter mapping
+- **`genai`** (off by default): thin companion adapter mapping
   [`genai`](https://crates.io/crates/genai) `ModelIden` values to pricing
   entries (`model_router::genai_compat`). The core never depends on genai.
 
@@ -140,7 +140,7 @@ client's model names can be used directly as pricing-table keys.
 - Routing is deterministic: the pricing table is a `BTreeMap` and selection
   sorting is stable, so ties resolve to the alphabetically first model.
 - `CostTracker` accumulates in fixed point at $0.0001 granularity,
-  **truncating** — recorded deltas never exceed the true cost, totals err
+  **truncating**: recorded deltas never exceed the true cost, totals err
   slightly low, and costs under $0.0001 truncate to zero. Budget enforcement
   runs in `f64` before any state is mutated.
 

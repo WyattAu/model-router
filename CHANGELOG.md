@@ -1,14 +1,14 @@
 # Changelog
 
 All notable changes to this project are documented here. Format: [Keep a
-Changelog](https://keepachangelog.com/) — versions follow [semver](https://semver.org).
+Changelog](https://keepachangelog.com/): versions follow [semver](https://semver.org).
 
 ## [Unreleased]
 
 ## [0.2.0] - 2026-09-16
 
 ### Changed
-- **BREAKING**: `ModelPricing` gained a private `updated_at_unix` field — the
+- **BREAKING**: `ModelPricing` gained a private `updated_at_unix` field: the
   struct is no longer constructible with a struct expression
   (`constructible_struct_adds_private_field`).
 - **BREAKING**: `RouterError` gained a `Json` variant (exhaustive enum,
@@ -24,7 +24,7 @@ against the v0.1.0 baseline. First release with a committed Cargo.lock
 
 ### Added
 - Config-knob behavior matrix (`tests/config_matrix.rs`, committed
-  2026-09-12): all 11 knobs behavior-proven — default model, per-class
+  2026-09-12): all 11 knobs behavior-proven: default model, per-class
   rules, fallback chains, per-model pricing, pricing merge freshness,
   quality-tier gating, context/output limits, budget enforcement,
   provider defaults, and pricing accessors (`updated_at` builders covered
@@ -39,7 +39,7 @@ against the v0.1.0 baseline. First release with a committed Cargo.lock
 
 ### Added
 - `tests/config_matrix.rs` (10 tests): behavior-observable coverage for
-  every public config/builder knob — `set_default_model`, `with_rule`,
+  every public config/builder knob: `set_default_model`, `with_rule`,
   `with_fallback` (including replace-not-append semantics),
   `with_pricing`/`add_pricing`, `merge_pricing` freshness, `with_quality_tier`
   gating `select_by_complexity`, `with_context_window`,
@@ -68,13 +68,13 @@ against the v0.1.0 baseline. First release with a committed Cargo.lock
 ## [0.1.1] - 2026-09-08
 
 ### Added
-- Price-table freshness (`updated_at_unix`, Unix seconds) — addresses the
+- Price-table freshness (`updated_at_unix`, Unix seconds): addresses the
   audit finding that static price tables go stale:
   - `ModelPricing::updated_at_unix()` getter plus
     `with_updated_at_unix(u64)` / `with_updated_at_now()` builders. The
     built-in defaults are unstamped (`None` = freshness unknown) and the
     field deserializes as `None` when absent, so pre-0.1.1 JSON still loads.
-  - `PricingTable` — refreshable pricing set with
+  - `PricingTable`: refreshable pricing set with
     `PricingTable::merge(&mut self, other)` (upsert entries that are missing
     or stamped strictly newer; stale and unstamped incoming entries never
     clobber) and `Router::merge_pricing(&PricingTable)`.
@@ -88,5 +88,5 @@ against the v0.1.0 baseline. First release with a committed Cargo.lock
 ## [0.1.0] - 2026-09-04
 
 ### Added
-- Cost-aware LLM routing core — per-model pricing tables and USD budget tracking.
+- Cost-aware LLM routing core: per-model pricing tables and USD budget tracking.
 - Published to crates.io (2026-09-04).

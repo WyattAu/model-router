@@ -1,9 +1,9 @@
-# Requirements — model-router
+# Requirements: model-router
 
 Numbered, testable requirements. Every requirement maps to at least one named
 test or doc-comment contract; security-relevant items cite THREAT-MODEL.md rows.
 
-Scope: LLM model router — provider-agnostic routing, failover, and usage accounting
+Scope: LLM model router: provider-agnostic routing, failover, and usage accounting
 
 ## Functional
 
