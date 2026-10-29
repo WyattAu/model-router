@@ -3,6 +3,24 @@
 All notable changes to this project are documented here. Format: [Keep a
 Changelog](https://keepachangelog.com/): versions follow [semver](https://semver.org).
 
+## [1.0.0] - 2026-10-29
+
+### Declared stable
+
+First 1.0. `model-router` routes production LLM traffic; this release commits the per-model pricing, USD budget tracking, task-class routing, and fallback-chain surfaces as API-stable.
+
+### Guarantees from here on
+
+- Breaking changes to public items require a minor bump plus a `#[deprecated]`
+  window of at least one minor release.
+- MSRV bumps are minor releases, not patch releases.
+- `#![deny(missing_docs)]` and `#![forbid(unsafe_code)]` are enforced.
+- Budget accounting is deterministic: identical request sequences yield identical USD totals on any 1.x release.
+
+### Explicitly not guaranteed
+
+- New provider adapters may arrive in minors behind features; existing routing and pricing semantics will not change.
+
 ## [Unreleased]
 
 ## [0.2.0] - 2026-09-16

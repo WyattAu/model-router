@@ -158,6 +158,13 @@ client's model names can be used directly as pricing-table keys.
 - Run: `cargo test` (add `--features json` for the JSON refresh tests and
   `--features genai` for the adapter tests).
 
+## Stability
+
+`model-router` is 1.0. Breaking changes require a minor bump and a `#[deprecated]`
+window of at least one minor release; MSRV bumps are minor releases, never
+patch releases. `missing_docs` is denied and `unsafe` is forbidden. See the
+changelog for the short list of explicitly non-contractual behaviours.
+
 ## License
 
 Apache-2.0 (matching clawdius).
